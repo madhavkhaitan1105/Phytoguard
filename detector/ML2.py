@@ -8,7 +8,7 @@ import seaborn as sns
 import json
 from sklearn.metrics import classification_report, confusion_matrix
 
-## Data Preprocessing 
+
 # Training Image Preprocessing 
 training_set = tf.keras.utils.image_dataset_from_directory(
     'train',

@@ -11,5 +11,5 @@ urlpatterns = [
     # Path for the plant exam page, passing 'plant' as a parameter
     path('plant-exam/', views.plant_exam, name='plant_exam'),  # accepts 'plant' via GET parameter
     
-    # Add other paths as necessary...
+   
 ]
