@@ -75,38 +75,24 @@ def plant_exam(request):
             uploaded_file_url = fs.url(filename)
 
             # Load image for prediction
-            img_path = fs.location + '/' + filename
-            img = Image.open(img_path)
-
-            # Convert image to RGB (if it's in RGBA or other format)
-            img = img.convert('RGB')
-
-            # Resize the image to match model input size (128x128)
+            img_path = fs.path(filename)  # Use .path() for compatibility across OS
+            img = Image.open(img_path).convert('RGB')  # Ensure 3-channel RGB
             img = img.resize((128, 128))
+            img_array = np.array(img) / 255.0  # Normalize to [0,1]
+            img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 128, 128, 3)
 
-            # Convert image to numpy array
-            img_array = np.array(img)
-
-            # Normalize the image (assuming model expects pixel values between 0 and 1)
-            img_array = img_array / 255.0
-
-            # Add batch dimension (as models expect a batch of images, not just one)
-            img_array = np.expand_dims(img_array, axis=0)
-
-            # Predict the class of the image
+            # Predict
             predictions = model.predict(img_array)
             predicted_class_index = np.argmax(predictions, axis=1)[0]
             predicted_class = class_names[predicted_class_index]
-            confidence = np.max(predictions)  # Confidence of the prediction
+            confidence = np.max(predictions)
 
-            # Render the result page with prediction details
             return render(request, 'detector/results.html', {
                 'prediction': predicted_class,
                 'confidence': round(confidence * 100, 2),
                 'uploaded_file_url': uploaded_file_url
             })
 
-        # Render the image upload page for the selected plant
         return render(request, 'detector/plant_exam_result.html', {'plant': plant})
 
-    return redirect('homepage2')  # Redirect back to homepage if no plant is selecte
+    return redirect('homepage2')

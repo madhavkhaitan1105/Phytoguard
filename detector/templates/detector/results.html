@@ -28,13 +28,38 @@
         p {
             font-size: 18px;
         }
+
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #2f855a;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Diagnosis Result 🌿</h1>
-        <p><strong>Predicted disease:</strong> {{ predicted_class }}</p>
+        <p><strong>Predicted disease:</strong> {{ prediction }}</p>
+        <p><strong>Confidence:</strong> {{ confidence }}%</p>
+
+        {% if uploaded_file_url %}
+            <img src="{{ uploaded_file_url }}" alt="Uploaded Image">
+        {% endif %}
+
+        <br>
         <a href="{% url 'homepage2' %}">Try another image</a>
     </div>
 </body>
 </html>
+

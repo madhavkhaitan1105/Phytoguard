@@ -9,7 +9,7 @@ model = tf.keras.models.load_model('trained_model.keras')
 model.summary()
 
 # Visualizing a Single Image from the Test Set
-image_path = r"C:\Users\madha\OneDrive\Desktop\PHYTO Guard\test\AppleScab2.JPG"
+image_path = "detector/trial/potato_healthy.jpeg"
 
 # Reading Image
 img = cv2.imread(image_path)  # By Default BGR
