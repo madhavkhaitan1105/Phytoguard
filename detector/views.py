@@ -66,7 +66,7 @@ class_names = [
 
 def plant_exam(request):
     plant = request.GET.get('plant', None)
-    
+
     if plant:
         if request.method == 'POST' and request.FILES.get('plant_image'):
             uploaded_file = request.FILES['plant_image']
@@ -74,24 +74,43 @@ def plant_exam(request):
             filename = fs.save(uploaded_file.name, uploaded_file)
             uploaded_file_url = fs.url(filename)
 
-            # Load image for prediction
-            img_path = fs.path(filename)  # Use .path() for compatibility across OS
-            img = Image.open(img_path).convert('RGB')  # Ensure 3-channel RGB
-            img = img.resize((128, 128))
-            img_array = np.array(img) / 255.0  # Normalize to [0,1]
-            img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 128, 128, 3)
+            try:
+                # Load image
+                img_path = fs.path(filename)
+                img = Image.open(img_path).convert('RGB')
+                img = img.resize((128, 128))
+                img_array = np.array(img) / 255.0
+                img_array = np.expand_dims(img_array, axis=0)
 
-            # Predict
-            predictions = model.predict(img_array)
-            predicted_class_index = np.argmax(predictions, axis=1)[0]
-            predicted_class = class_names[predicted_class_index]
-            confidence = np.max(predictions)
+                # Predict
+                predictions = model.predict(img_array)
+               # Debug: Print all class probabilities
+                print("\n----- Prediction Probabilities -----")
+                for i, prob in enumerate(predictions[0]):
+                    print(f"{class_names[i]}: {round(prob * 100, 2)}%")
+                print("------------------------------------\n")
 
-            return render(request, 'detector/results.html', {
-                'prediction': predicted_class,
-                'confidence': round(confidence * 100, 2),
-                'uploaded_file_url': uploaded_file_url
-            })
+
+                predicted_class_index = np.argmax(predictions, axis=1)[0]
+                predicted_class = class_names[predicted_class_index]
+                confidence = np.max(predictions)
+
+                print("Predicted index:", predicted_class_index)
+                print("Confidence score:", confidence)
+
+                return render(request, 'detector/results.html', {
+                    'prediction': predicted_class,
+                    'confidence': round(confidence * 100, 2),
+                    'uploaded_file_url': uploaded_file_url
+                })
+
+            except Exception as e:
+                print("Error during prediction:", e)
+                return render(request, 'detector/results.html', {
+                    'prediction': 'Prediction failed',
+                    'confidence': 0,
+                    'uploaded_file_url': uploaded_file_url
+                })
 
         return render(request, 'detector/plant_exam_result.html', {'plant': plant})
 
