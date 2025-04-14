@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Plant - PhytoGuard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #dbeafe, #c6f6d5);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px 50px;
+            text-align: center;
+            width: 90%;
+            max-width: 480px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #2f855a;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #444;
+            margin-bottom: 30px;
+        }
+
+        .plant-option {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background-color: #2f855a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .plant-option:hover {
+            background-color: #276749;
+            transform: translateY(-2px);
+        }
+
+        .welcome {
+            margin-bottom: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Welcome, {{ user.username }}! 🌱</h1>
+        <h2>Select the plant you want to examine:</h2>
+        <form method="GET" action="{% url 'plant_exam' %}">
+            <button class="plant-option" type="submit" name="plant" value="Apple">🍎 Apple</button>
+            <button class="plant-option" type="submit" name="plant" value="Corn">🌽 Corn</button>
+            <button class="plant-option" type="submit" name="plant" value="Potato">🥔 Potato</button>
+        </form>
+    </div>
+</body>
+</html>
