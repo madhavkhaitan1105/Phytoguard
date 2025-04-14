@@ -1,11 +1,11 @@
 <html>
 <body>
     <h2>Select a Plant</h2>
-    <form action="{% url 'upload_image' %}" method="get">
+    <form action="{% url 'plant_exam' plant=plant %}" method="get">
         <select name="plant">
-            <option value="plant1">Apple</option>
-            <option value="plant2">Corn</option>
-            <option value="plant3">Potato</option>
+            <option value="Apple">Apple</option>
+            <option value="Corn">Corn</option>
+            <option value="Potato">Potato</option>
         </select>
         <button type="submit">Next</button>
     </form>

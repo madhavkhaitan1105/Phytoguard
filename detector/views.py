@@ -12,6 +12,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
+import os
+print("Current working directory:", os.getcwd())
 
 def home(request):
     return render(request, 'detector/home.html')
@@ -34,7 +36,7 @@ def plant_exam(request):
 
 
 # Load your pre-trained model
-model = load_model('models/Plants.h5')
+model = load_model('backend/trained_model.h5')
 
 # Class names (same as before)
 class_names = [
@@ -44,43 +46,67 @@ class_names = [
     'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy'
 ]
 
-def plant_exam(request, plant):
-    if request.method == 'POST' and request.FILES.get('plant_image'):
-        uploaded_file = request.FILES['plant_image']
-        fs = FileSystemStorage()
-        filename = fs.save(uploaded_file.name, uploaded_file)
-        uploaded_file_url = fs.url(filename)
+from django.core.files.storage import FileSystemStorage
+from tensorflow.keras.models import load_model
+import numpy as np
+from PIL import Image
+from django.shortcuts import render, redirect
+from .models import Plant  # If you're using Plant model, otherwise you can remove this line
 
-        # Load image for prediction
-        img_path = fs.location + '/' + filename
-        img = Image.open(img_path)
+# Load your pre-trained model once, outside of the function to avoid loading it multiple times
+model = load_model('backend/trained_model.h5')
 
-        # Resize the image to match model input size (128x128)
-        img = img.resize((128, 128))
+# Class names (same as before)
+class_names = [
+    'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
+    'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
+    'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___healthy',
+    'Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy'
+]
 
-        # Convert image to numpy array
-        img_array = np.array(img)
+def plant_exam(request):
+    plant = request.GET.get('plant', None)
+    
+    if plant:
+        if request.method == 'POST' and request.FILES.get('plant_image'):
+            uploaded_file = request.FILES['plant_image']
+            fs = FileSystemStorage()
+            filename = fs.save(uploaded_file.name, uploaded_file)
+            uploaded_file_url = fs.url(filename)
 
-        # Normalize the image (assuming model expects pixel values between 0 and 1)
-        img_array = img_array / 255.0
+            # Load image for prediction
+            img_path = fs.location + '/' + filename
+            img = Image.open(img_path)
 
-        # Add batch dimension (as models expect a batch of images, not just one)
-        img_array = np.expand_dims(img_array, axis=0)
+            # Convert image to RGB (if it's in RGBA or other format)
+            img = img.convert('RGB')
 
-        # Predict the class of the image
-        predictions = model.predict(img_array)
-        predicted_class_index = np.argmax(predictions, axis=1)[0]
-        predicted_class = class_names[predicted_class_index]
-        confidence = np.max(predictions)  # Confidence of the prediction
+            # Resize the image to match model input size (128x128)
+            img = img.resize((128, 128))
 
-        # Render the result page
-        return render(request, 'detector/result.html', {
-            'prediction': predicted_class,
-            'confidence': round(confidence * 100, 2),
-            'uploaded_file_url': uploaded_file_url
-        })
+            # Convert image to numpy array
+            img_array = np.array(img)
 
-    # Render the page with the plant name
-    return render(request, 'detector/examine.html', {'plant': plant})
+            # Normalize the image (assuming model expects pixel values between 0 and 1)
+            img_array = img_array / 255.0
 
+            # Add batch dimension (as models expect a batch of images, not just one)
+            img_array = np.expand_dims(img_array, axis=0)
 
+            # Predict the class of the image
+            predictions = model.predict(img_array)
+            predicted_class_index = np.argmax(predictions, axis=1)[0]
+            predicted_class = class_names[predicted_class_index]
+            confidence = np.max(predictions)  # Confidence of the prediction
+
+            # Render the result page with prediction details
+            return render(request, 'detector/results.html', {
+                'prediction': predicted_class,
+                'confidence': round(confidence * 100, 2),
+                'uploaded_file_url': uploaded_file_url
+            })
+
+        # Render the image upload page for the selected plant
+        return render(request, 'detector/plant_exam_result.html', {'plant': plant})
+
+    return redirect('homepage2')  # Redirect back to homepage if no plant is selecte

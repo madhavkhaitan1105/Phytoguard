@@ -3,11 +3,13 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    # path('register/', views.register_view, name='register'),
-    # path('login/', views.login_view, name='login'),
-    # path('logout/', views.logout_view, name='logout'),
     path('homepage2/', views.homepage2, name='homepage2'),
-    path('examine/<str:plant>/', views.plant_exam, name='plant_exam'),
-    ]
-
-
+    
+    # Path for the plant selection page
+    path('plant-selection/', views.plant_selection, name='plant_selection'),
+    
+    # Path for the plant exam page, passing 'plant' as a parameter
+    path('plant-exam/', views.plant_exam, name='plant_exam'),  # accepts 'plant' via GET parameter
+    
+    # Add other paths as necessary...
+]
