@@ -76,7 +76,7 @@ export default function AboutPage() {
         },
         {
             name: "TypeScript",
-            description: "Type Safe JavaScript",
+            description: "Type Safe JavaScript ",
             icon: Code,
             color: "from-blue-400 to-blue-600"
         }
