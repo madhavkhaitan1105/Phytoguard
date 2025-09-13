@@ -70,7 +70,7 @@ export default function About() {
     { number: "94%", label: "Detection Accuracy" },
     { number: "200+", label: "Disease Categories" },
     { number: "50K+", label: "Training Images" },
-    { number: "10K+", label: "Happy Users" }
+    { number: "10K+", label: "Happy Users " }
   ]
 
   return (
