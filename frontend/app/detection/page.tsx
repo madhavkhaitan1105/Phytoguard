@@ -3,18 +3,18 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { 
-  Upload, 
-  X, 
-  Camera, 
-  FileImage, 
-  CheckCircle, 
-  AlertTriangle,
-  Leaf,
-  ArrowLeft,
-  Download,
-  Share2,
-  RotateCcw
+import {
+    Upload,
+    X,
+    Camera,
+    FileImage,
+    CheckCircle,
+    AlertTriangle,
+    Leaf,
+    ArrowLeft,
+    Download,
+    Share2,
+    RotateCcw
 } from "lucide-react";
 import Link from "next/link";
 
@@ -24,33 +24,11 @@ export default function DetectionPage() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisComplete, setAnalysisComplete] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    const [result, setResult] = useState<null | {
+        disease: string;
+        confidence: number;
+    }>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Mock analysis results
-    const mockResults = {
-        disease: "Apple Scab",
-        confidence: 95,
-        severity: "Moderate",
-        description: "Apple scab is a common fungal disease that affects apple trees. It causes dark, scabby lesions on leaves and fruit.",
-        symptoms: [
-            "Dark, olive-green spots on leaves",
-            "Velvety, dark lesions on fruit",
-            "Premature leaf drop",
-            "Reduced fruit quality"
-        ],
-        treatment: [
-            "Apply fungicide sprays in early spring",
-            "Remove and destroy infected leaves and fruit",
-            "Improve air circulation around trees",
-            "Use resistant apple varieties"
-        ],
-        prevention: [
-            "Plant disease-resistant varieties",
-            "Maintain proper tree spacing",
-            "Avoid overhead watering",
-            "Regular pruning and cleanup"
-        ]
-    };
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -103,8 +81,34 @@ export default function DetectionPage() {
 
         setIsAnalyzing(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Prepare form data
+        const formData = new FormData();
+        formData.append("image", selectedImage);
+
+        try {
+            const res = await fetch("http://localhost:8000/api/detect/", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+
+            if (data.prediction && data.confidence !== undefined) {
+                setResult({
+                    disease: data.prediction,
+                    confidence: data.confidence,
+                });
+            } else {
+                setResult({
+                    disease: "Unknown",
+                    confidence: 0,
+                });
+            }
+        } catch (error) {
+            setResult({
+                disease: "Error",
+                confidence: 0,
+            });
+        }
 
         setIsAnalyzing(false);
         setAnalysisComplete(true);
@@ -113,6 +117,7 @@ export default function DetectionPage() {
     const resetAnalysis = () => {
         setAnalysisComplete(false);
         setIsAnalyzing(false);
+        setResult(null);
     };
 
     return (
@@ -165,8 +170,8 @@ export default function DetectionPage() {
                         {!imagePreview ? (
                             <div
                                 className={`relative border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-200 ${dragActive
-                                        ? "border-green-400 bg-green-50 dark:bg-green-900/20"
-                                        : "border-gray-300 dark:border-gray-600 hover:border-green-400 dark:hover:border-green-500"
+                                    ? "border-green-400 bg-green-50 dark:bg-green-900/20"
+                                    : "border-gray-300 dark:border-gray-600 hover:border-green-400 dark:hover:border-green-500"
                                     }`}
                                 onDragEnter={handleDrag}
                                 onDragLeave={handleDrag}
@@ -235,22 +240,22 @@ export default function DetectionPage() {
                                         </button>
                                     </div>
 
-                  <div className="relative group">
-                    <Image
-                      src={imagePreview}
-                      alt="Plant preview"
-                      width={400}
-                      height={256}
-                      className="w-full h-64 object-cover rounded-2xl"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-2xl flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button className="bg-white text-gray-900 px-4 py-2 rounded-lg font-semibold">
-                          View Full Size
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                                    <div className="relative group">
+                                        <Image
+                                            src={imagePreview}
+                                            alt="Plant preview"
+                                            width={400}
+                                            height={256}
+                                            className="w-full h-64 object-cover rounded-2xl"
+                                        />
+                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-2xl flex items-center justify-center">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <button className="bg-white text-gray-900 px-4 py-2 rounded-lg font-semibold">
+                                                    View Full Size
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Analysis Controls */}
@@ -316,121 +321,38 @@ export default function DetectionPage() {
 
                     {/* Analysis Results */}
                     <AnimatePresence>
-                        {analysisComplete && (
+                        {analysisComplete && result && (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 className="space-y-6"
                             >
-                                {/* Main Result Card */}
                                 <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="font-poppins font-bold text-2xl text-gray-900 dark:text-white">
                                             Analysis Results
                                         </h3>
-                                        <div className="flex gap-2">
-                                            <button className="p-2 text-gray-400 hover:text-green-600 transition-colors">
-                                                <Share2 className="w-5 h-5" />
-                                            </button>
-                                            <button className="p-2 text-gray-400 hover:text-green-600 transition-colors">
-                                                <Download className="w-5 h-5" />
-                                            </button>
-                                        </div>
                                     </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                         <div className="text-center">
                                             <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                                 <AlertTriangle className="w-8 h-8 text-white" />
                                             </div>
                                             <h4 className="font-poppins font-semibold text-lg text-gray-900 dark:text-white mb-2">
-                                                {mockResults.disease}
+                                                {result.disease}
                                             </h4>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">Disease Detected</p>
                                         </div>
-
                                         <div className="text-center">
                                             <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                                <span className="text-white font-bold text-xl">{mockResults.confidence}%</span>
+                                                <span className="text-white font-bold text-xl">{result.confidence}%</span>
                                             </div>
                                             <h4 className="font-poppins font-semibold text-lg text-gray-900 dark:text-white mb-2">
                                                 Confidence
                                             </h4>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">Accuracy Level</p>
                                         </div>
-
-                                        <div className="text-center">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                                <span className="text-white font-bold text-lg">{mockResults.severity}</span>
-                                            </div>
-                                            <h4 className="font-poppins font-semibold text-lg text-gray-900 dark:text-white mb-2">
-                                                Severity
-                                            </h4>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">Disease Level</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-6">
-                                        <h4 className="font-poppins font-semibold text-lg text-gray-900 dark:text-white mb-3">
-                                            Description
-                                        </h4>
-                                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                                            {mockResults.description}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Symptoms Card */}
-                                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-                                    <h4 className="font-poppins font-semibold text-xl text-gray-900 dark:text-white mb-6">
-                                        Common Symptoms
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {mockResults.symptoms.map((symptom, index) => (
-                                            <div key={index} className="flex items-start gap-3">
-                                                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                                <span className="text-gray-600 dark:text-gray-300">{symptom}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Treatment Card */}
-                                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-                                    <h4 className="font-poppins font-semibold text-xl text-gray-900 dark:text-white mb-6">
-                                        Treatment Recommendations
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {mockResults.treatment.map((item, index) => (
-                                            <div key={index} className="flex items-start gap-3">
-                                                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    <span className="text-green-600 dark:text-green-400 font-semibold text-sm">
-                                                        {index + 1}
-                                                    </span>
-                                                </div>
-                                                <span className="text-gray-600 dark:text-gray-300">{item}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Prevention Card */}
-                                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-                                    <h4 className="font-poppins font-semibold text-xl text-gray-900 dark:text-white mb-6">
-                                        Prevention Tips
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {mockResults.prevention.map((item, index) => (
-                                            <div key={index} className="flex items-start gap-3">
-                                                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-sm">
-                                                        {index + 1}
-                                                    </span>
-                                                </div>
-                                                <span className="text-gray-600 dark:text-gray-300">{item}</span>
-                                            </div>
-                                        ))}
                                     </div>
                                 </div>
                             </motion.div>
