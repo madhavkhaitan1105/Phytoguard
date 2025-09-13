@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
     Leaf,
@@ -24,21 +24,21 @@ export default function AboutPage() {
             name: "Madhav Khaitan",
             role: "Model Training & Dataset Curation",
             description: "Expert in machine learning and computer vision, responsible for training our AI models and curating high-quality plant disease datasets.",
-            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+            image: "/madhav.png",
             skills: ["Machine Learning", "Python"]
         },
         {
             name: "Maanyata Aul",
             role: "Backend Developer",
             description: "Backend specialist focused on building robust APIs and server infrastructure to power our plant disease detection platform.",
-            image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
+            image: "/maanyata.png",
             skills: ["Django", "REST APIs", "Database Design", "Python"]
         },
         {
             name: "Raghav Katta",
             role: "Full Stack Developer",
             description: "Full Stack developer creating intuitive, responsive user interfaces that make plant disease detection accessible to everyone and integrating the frontend with the backend.",
-            image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+            image: "/raghav.jpg",
             skills: ["Next.js", "Framer Motion", "TypeScript", "UI/UX Design"]
         }
     ];
@@ -70,13 +70,13 @@ export default function AboutPage() {
         },
         {
             name: "Framer Motion",
-            description: "Animation library for React",
+            description: "Animation library ",
             icon: Award,
             color: "from-purple-400 to-purple-600"
         },
         {
             name: "TypeScript",
-            description: "Typed JavaScript",
+            description: "Type Safe JavaScript",
             icon: Code,
             color: "from-blue-400 to-blue-600"
         }
@@ -234,10 +234,12 @@ export default function AboutPage() {
                             >
                                 <div className="text-center mb-6">
                                     <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mx-auto mb-4 overflow-hidden">
-                                        <img
+                                        <Image
                                             src={member.image}
                                             alt={member.name}
                                             className="w-full h-full object-cover"
+                                            width={96}
+                                            height={96}
                                         />
                                     </div>
                                     <h3 className="font-poppins font-bold text-xl text-gray-900 dark:text-white mb-2">
