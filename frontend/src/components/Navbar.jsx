@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { FaMoon, FaSun, FaLeaf } from 'react-icons/fa'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FaMoon, FaSun, FaLeaf, FaBars, FaTimes } from 'react-icons/fa'
+import { useState } from 'react'
 
 export default function Navbar({ darkMode, setDarkMode }) {
   const location = useLocation()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -65,20 +67,82 @@ export default function Navbar({ darkMode, setDarkMode }) {
             ))}
           </nav>
 
-          {/* Dark Mode Toggle */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-lg transition-colors ${
-              darkMode 
-                ? 'text-yellow-400 hover:bg-gray-800' 
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
-          </motion.button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Dark Mode Toggle */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-2 rounded-lg transition-colors ${
+                darkMode 
+                  ? 'text-yellow-400 hover:bg-gray-800' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
+            </motion.button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-2 rounded-lg transition-colors ${
+                darkMode 
+                  ? 'text-yellow-400 hover:bg-gray-800' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`p-2 rounded-lg transition-colors ${
+                darkMode 
+                  ? 'text-gray-300 hover:bg-gray-800' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            </motion.button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-gray-200 dark:border-gray-700"
+            >
+              <div className="px-4 py-4 space-y-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-3 py-2 text-base font-medium rounded-lg transition-colors ${
+                      location.pathname === item.path
+                        ? darkMode ? 'text-green-400 bg-gray-800' : 'text-green-600 bg-green-50'
+                        : darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.header>
   )
