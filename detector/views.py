@@ -11,6 +11,8 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 import os
 print("Current working directory:", os.getcwd())
@@ -115,3 +117,28 @@ def plant_exam(request):
         return render(request, 'detector/plant_exam_result.html', {'plant': plant})
 
     return redirect('homepage2')
+
+
+@csrf_exempt
+def api_detect(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        uploaded_file = request.FILES['image']
+        fs = FileSystemStorage()
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        img_path = fs.path(filename)
+        try:
+            img = Image.open(img_path).convert('RGB')
+            img = img.resize((128, 128))
+            img_array = np.array(img) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
+            predictions = model.predict(img_array)
+            predicted_class_index = np.argmax(predictions, axis=1)[0]
+            predicted_class = class_names[predicted_class_index]
+            confidence = float(np.max(predictions))
+            return JsonResponse({
+                'prediction': predicted_class,
+                'confidence': round(confidence * 100, 2)
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
